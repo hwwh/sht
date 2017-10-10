@@ -9,8 +9,9 @@
 <link href="${baseUrl}/users/css/showGoods_style.css" rel="stylesheet" type="text/css" />
 <title>发布商品展示</title>
 </head>
-<body>
+<body style="background-color:white;">
 <!-- 导航选择栏 -->
+<div class="allList_show">
    <div class="Order_form_style">
       <div class="Order_form_filter" style="height:60px;">
        		<a href="javascript:void(0)" class="on" onclick="showList()" style="width:80px;height:35px;margin-top:35px;"><i style="position:absolute;top:20px;left:10px;">所有订单</i></a>
@@ -37,6 +38,9 @@
 		<div class="turnPage"></div>
 		<!-- 已发布列表 -->
 		<div class="list">
+		</div>
+		
+		
 		</div>
 		<!-- 详情修改 -->
 		<div>
@@ -146,8 +150,8 @@ function showGoodsdetail(id){
 	    data :'id='+id,  //传递到后台的参数
 	    success:function(data){
 	    	console.info(data);
-	    	$(".list").empty();
-	    	$(".turnPage").empty();
+	    	$(".allList_show").empty();
+	    	//$(".turnPage").empty();
 	    	var h = "";
 	    	status = showStatus(data['status']);
 	    	h += "<table name='t1'><tr><td><div class='iteam-warp' style='dispaly:inline-block;'>标题:&nbsp;&nbsp;<input type='text' value='"+data['title']+"' id='title'/></div></td><td><div class='iteam-warp' style='float:right' >介绍:&nbsp;&nbsp;<input type='text' value='"+data['description']+"' id='description'/></div></td></tr><tr><td><div class='iteam-warp' style='dispaly:inline-block;'>现价:&nbsp;&nbsp;<input type='text' value='"+data['sprice']+"' id='sprice'/></div></td><td><div class='iteam-warp' style='float:right'>原价:&nbsp;&nbsp;<input type='text' value='"+data['price']+"' id='price'/></div></td></tr><tr><td><div class='iteam-warp' style='dispaly:inline-block;'>成色:&nbsp;&nbsp;<input type='text' value='"+data['condition']+"' id='condition'/></div></td><td><div class='iteam-warp' style='float:right'>地区:&nbsp;&nbsp;<input type='text' value='"+data['region']+"' id='region' /></div></td></tr></table>";
@@ -182,8 +186,6 @@ function updateGoodsByidAndStatus(id,statu){
 		});
 		
 	}
-
-	
 }
 
 
@@ -225,7 +227,7 @@ function showList(status){
 	    url : url,//需要访问的地址
 	    data :'PageTo='+PageTo+'&status='+status,  //传递到后台的参数
 	    success:function(data){
-	    	//console.info(data);
+	    	console.info(data);
 	    		var h = "";
 	    		var id = "";
 	    		for(var i =0;i<data.length;i++){
@@ -236,7 +238,7 @@ function showList(status){
 	    		h+="<div class='Order_form_list'><table><thead><tr><td class='list_name_title0'>商品</td><td class='list_name_title1'>原 价(元 )</td><td class='list_name_title2'>现价(元)</td><td class='list_name_title5'>订单状态</td><td class='list_name_title6'>操作</td></tr></thead>";
 	    		h+="<tbody><tr class='Order_info'><td colspan='6' class='Order_form_time'><input name='' type='checkbox' class='checkbox'/>下单时间："+goods['createtime']+" | 订单号：暂无 <em></em></td></tr>";	
 	    		h+="<tr class='Order_Details'><td colspan='3'><table class='Order_product_style'><tbody><tr><td><div class='product_name clearfix'><a href='#' class='product_img'><img src='http://localhost/sht/common/goods_getGoodsImg.action?size=200&imgName="+goods['mainImgPath']+"' width='80px' height='80px'></a>";	
-	    		h+="<a href=javascript:showGoodsdetail('"+id+"'); class='p_name'>"+goods['title']+"</a><p class='specification'>"+goods['description']+"</p></div></td><td>"+goods['price']+"</td><td>"+goods['sprice']+"</td></tr></tbody></table></td>  ";	
+	    		h+="<a href=javascript:showGoodsdetail('"+id+"'); class='p_name'>"+goods['title']+"</a><p class='specification'>"+goods['description']+"</p></div></td><td style='text-decoration:line-through;'>"+goods['price']+"</td><td>"+goods['sprice']+"</td></tr></tbody></table></td>  ";	
 	    		h+="<td class='split_line'><p style='color:#F30'>"+status+"</p></td>";	
 	    		if(status=="已完成订单"){
 	    			h+="<td class='operating'><a href=>查看评价</a></td></tr></tbody></table></div>";
@@ -247,7 +249,11 @@ function showList(status){
 	    		}else if(status=="待发货"){
 	    			h+="<td class='operating'><a href=javascript:updateGoodsByidAndStatus('"+id+"','2');>发货</a></td></tr></tbody></table></div>";
 	    		}else if(status=="申请退款"){
-	    			h+="<td class='operating'><a href=javascript:updateGoodsByidAndStatus('"+id+"','-9');>同意退款</a></td></tr></tbody></table></div>";
+	    			if(goods['refusereturnmoneybill']){
+	    			h+="<td class='operating'><a href=javascript:updateGoodsByidAndStatus('"+id+"','-9');>同意退款</a>(已上传凭证)</td></tr></tbody></table></div>";
+	    			}else{
+	    			h+="<td class='operating'><a href=javascript:updateGoodsByidAndStatus('"+id+"','-9');>同意退款</a></td></tr></tbody></table></div>";	
+	    			}
 	    		}else if(status=="退款成功"){
 	    			h+="<td class='operating'><a href=javascript:updateGoodsByidAndStatus('"+id+"','0');>重新上架</a></td></tr></tbody></table></div>";
 	    		}else if(status=="已发货"){
@@ -295,7 +301,7 @@ function searchUGoods(){
 	    			h+="<div class='Order_form_list'><table><thead><tr><td class='list_name_title0'>商品</td><td class='list_name_title1'>原 价(元 )</td><td class='list_name_title2'>现价(元)</td><td class='list_name_title5'>订单状态</td><td class='list_name_title6'>操作</td></tr></thead>";
 		    		h+="<tbody><tr class='Order_info'><td colspan='6' class='Order_form_time'><input name='' type='checkbox' class='checkbox'/>下单时间："+goods['createtime']+" | 订单号：暂无 <em></em></td></tr>";	
 		    		h+="<tr class='Order_Details'><td colspan='3'><table class='Order_product_style'><tbody><tr><td><div class='product_name clearfix'><a href='#' class='product_img'><img src='http://localhost/sht/common/goods_getGoodsImg.action?size=200&imgName="+goods['mainImgPath']+"' width='80px' height='80px'></a>";	
-		    		h+="<a href=javascript:showGoodsdetail('"+id+"'); class='p_name'>"+goods['title']+"</a><p class='specification'>"+goods['description']+"</p></div></td><td>"+goods['price']+"</td><td>"+goods['sprice']+"</td></tr></tbody></table></td>  ";	
+		    		h+="<a href=javascript:showGoodsdetail('"+id+"'); class='p_name'>"+goods['title']+"</a><p class='specification'>"+goods['description']+"</p></div></td><td style='text-decoration:line-through;>"+goods['price']+"</td><td>"+goods['sprice']+"</td></tr></tbody></table></td>  ";	
 		    		h+="<td class='split_line'><p style='color:#F30'>"+status+"</p></td>";	
 		    		if(status=="已完成订单"){
 		    			h+="<td class='operating'><a href=>查看评价</a></td></tr></tbody></table></div>";
