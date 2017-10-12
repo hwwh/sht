@@ -27,6 +27,7 @@
       </div></div>
 			<hr/>
 			
+
 			<!-- 搜索框 -->
 		<div class="search iteam-warp">
 			<input type="text" placeholder="请输入商品标题" onchange="searchUGoods();" id="search_input"/> <button onclick="searchUGoods();">搜索</button>
@@ -42,11 +43,11 @@
 		<!-- 已发布列表 -->
 		<div class="list">
 		</div>
-		
-			
+
 		
 		<!-- 详情修改 -->
-		
+		<!-- <div class="detail">
+		</div> -->
 		
 		<div class="detail_box" style="display:none">
 		<div class="detail"></div>
@@ -58,6 +59,7 @@
 		<input type="hidden" value="${baseUrl}" id="baseUrl"/>
 		<input type="hidden" value="${onlineUser.id}" id="userid"/>
 </body>
+
 <style>
 .detail_box{
 	border:1px dotted  grey;
@@ -175,31 +177,50 @@ function getGoodscount(){
 	var  sprice = $("#sprice").val();
 	var  price = $("#price").val();
 	var  condition = $("#condition").val();
+	var reg ='^[1-9]\d*$';//匹配正整数
+	var reg1 ='^[1-9]\d*\.\d*|0\.\d*[1-9]\d*$';//匹配正浮点数
 	//var  region = $("#region").val();
-	$.ajax({
-		type : 'post',  //请求方式,get,post等
-	    dataType:'json',//response返回数据的格式
-	    async : true,  //同步请求  
-	    url : baseUrl+"/users/U_UpdateUGoodsById.action",  //需要访问的地址
-	    data :'id='+id+'&title='+title+'&description='+description+'&sprice='+sprice+'&price='+price+'&condition='+condition,  //传递到后台的参数
-	    success:function(data){
-	    	if(!data['msg']){
-	    	alert("修改成功");
-	    	$(".detail_box").hide();
-	    	showList();
-	    	}
-	    },error:function(){
-	    	$(".detail_box").hide();
-	    	
-	    }
-	})
+	if(sprice>price){
+		alert("转卖价不能高于原价");
+	}else if(description==""){
+		alert("介绍不能为空");
+	}else if(sprice==""){
+		alert("现价不能为空");
+	}else if(price==""){
+		alert("原价不能为空");isNaN(s)
+	}else if(isNaN(sprice)||parseFloat(sprice)<0){
+		alert("现价应为正数");
+	}else if(isNaN(price)||parseFloat(price)<0){
+		alert("原价应为正数");
+	}else{
+		$.ajax({
+			type : 'post',  //请求方式,get,post等
+		    dataType:'json',//response返回数据的格式
+		    async : true,  //同步请求  
+		    url : baseUrl+"/users/U_UpdateUGoodsById.action",  //需要访问的地址
+		    data :'id='+id+'&title='+title+'&description='+description+'&sprice='+sprice+'&price='+price+'&condition='+condition,  //传递到后台的参数
+		    success:function(data){
+		    	if(!data['msg']){
+		    	alert("修改成功");
+		    	$(".detail_box").hide();
+		    	showList();
+		    	}
+		    },error:function(){
+		    	$(".detail_box").hide();
+		    	
+		    }
+		})
+	}
+	
 } 
 
 
 
 
 //显示商品的详细信息
-function showGoodsdetail(id){
+function showGoodsdetail(id,status){
+	if(status==0||status==-6||status==-7||status==-3){
+	
 	$.ajax({
 		type : 'post',  //请求方式,get,post等
 	    dataType:'json',//response返回数据的格式
@@ -208,6 +229,9 @@ function showGoodsdetail(id){
 	    data :'id='+id,  //传递到后台的参数
 	    success:function(data){
 	    	console.info(data);
+        
+	    	//$(".allList_show").empty();
+        
 	    	$(".detail_box").show();
 	    	$(".allList_show").hide();
 	    	$(".list").empty();
@@ -216,7 +240,7 @@ function showGoodsdetail(id){
 	    	
 	    	h+=" <i>商品详情</i><hr/><div style='float:left;border-right:1px solid grey;'><lable>标题:<input type='text' value='"+data['title']+"' id='title'/></lable><br/>";
 	    	h+="<lable>介绍:<input type='text' value='"+data['description']+"' id='description'/></lable><br/><lable>现价:<input type='text' value='"+data['sprice']+"' id='sprice'/></lable><br/>";
-	    	h+="<lable>原价:<input type='text' value='"+data['price']+"' id='price'/></lable><br/><lable>成色:<input type='text' value='"+data['condition']+"' id='condition'/></lable><br/></div>";
+	    	h+="<lable>原价:<input type='text' value='"+data['price']+"' id='price'/></lable><br/><lable>成色:<select id='condition'><option value ='"+data['condition']+"'>"+data['condition']+"</option><option  value ='1'>1</option><option  value='2'>2</option><option  value='3'>3</option><option  value='4'>4</option><option  value='5'>5</option><option  value='6'>6</option><option  value='7'>7</option><option value='8'>8</option><option  value='9'>9</option></select></lable><br/></div>";
 	    	h+="<div style='float:left;margin-top:10px;'><p>状态:"+status+"</p><p>浏览次数:"+data['browsenumber']+"</p><p>创建时间:"+data['createtime']+"</p><p>最后更新时间:"+data['lastupdatetime']+"</p></div>";
 	    	$(".detail").html(h);
 	    	h="";
@@ -227,7 +251,10 @@ function showGoodsdetail(id){
 	    },error:function(){
 	    	alert("失败");
 	    }
-	})
+	});
+	}else{
+		alert("商品已出售，无法修改");
+	}
 }
 //删除单件商品
 function updateGoodsByidAndStatus(id,statu){
@@ -298,8 +325,10 @@ function showList(status){
 	    			
 	    		h+="<div class='Order_form_list'><table><thead><tr><td class='list_name_title0'>商品</td><td class='list_name_title1'>原 价(元 )</td><td class='list_name_title2'>现价(元)</td><td class='list_name_title5'>订单状态</td><td class='list_name_title6'>操作</td></tr></thead>";
 	    		h+="<tbody><tr class='Order_info'><td colspan='6' class='Order_form_time'><input name='' type='checkbox' class='checkbox'/>下单时间："+goods['createtime']+" | 订单号：暂无 <em></em></td></tr>";	
+
 	    		h+="<tr class='Order_Details'><td colspan='3'><table class='Order_product_style'><tbody><tr><td><div class='product_name clearfix'><a href='"+baseUrl+"/goods/showGoodsDetailInfo.action?id="+goods['id']+"' class='product_img' target='_parent'><img src='http://localhost/sht/common/goods_getGoodsImg.action?size=200&imgName="+goods['mainImgPath']+"' width='80px' height='80px'></a>";	
-	    		h+="<a href=javascript:showGoodsdetail('"+id+"'); class='p_name'>"+goods['title']+"</a><p class='specification'>"+goods['description']+"</p></div></td><td style='text-decoration:line-through;'>"+goods['price']+"</td><td>"+goods['sprice']+"</td></tr></tbody></table></td>  ";	
+	    		h+="<a href=javascript:showGoodsdetail('"+id+"','"+goods['status']+"'); class='p_name'>"+goods['title']+"</a><p class='specification'>"+goods['description']+"</p></div></td><td style='text-decoration:line-through;'>"+goods['price']+"</td><td>"+goods['sprice']+"</td></tr></tbody></table></td>  ";	
+
 	    		h+="<td class='split_line'><p style='color:#F30'>"+status+"</p></td>";	
 	    		if(status=="已完成订单"){
 	    			h+="<td class='operating'><a href=>查看评价</a></td></tr></tbody></table></div>";
@@ -310,10 +339,12 @@ function showList(status){
 	    		}else if(status=="待发货"){
 	    			h+="<td class='operating'><a href=javascript:updateGoodsByidAndStatus('"+id+"','2');>发货</a></td></tr></tbody></table></div>";
 	    		}else if(status=="申请退款"){
+
 	    			if(goods['refusereturnmoneybill']){
-	    			h+="<td class='operating'><a href=javascript:updateGoodsByidAndStatus('"+id+"','-9');>同意退款</a>(已上传凭证)</td></tr></tbody></table></div>";
+	    			h+="<td class='operating'><a href='#'>(已上传凭证)</a></td></tr></tbody></table></div>";
 	    			}else{
-	    			h+="<td class='operating'><a href=javascript:updateGoodsByidAndStatus('"+id+"','-9');>同意退款</a></td></tr></tbody></table></div>";	
+	    			h+="<td class='operating'><a href='#'>(未上传凭证)</a></td></tr></tbody></table></div>";	
+
 	    			}
 	    		}else if(status=="退款成功"){
 	    			h+="<td class='operating'><a href=javascript:updateGoodsByidAndStatus('"+id+"','0');>重新上架</a></td></tr></tbody></table></div>";
@@ -361,8 +392,10 @@ function searchUGoods(){
 	    			status = showStatus(goods['status']);
 	    			h+="<div class='Order_form_list'><table><thead><tr><td class='list_name_title0'>商品</td><td class='list_name_title1'>原 价(元 )</td><td class='list_name_title2'>现价(元)</td><td class='list_name_title5'>订单状态</td><td class='list_name_title6'>操作</td></tr></thead>";
 		    		h+="<tbody><tr class='Order_info'><td colspan='6' class='Order_form_time'><input name='' type='checkbox' class='checkbox'/>下单时间："+goods['createtime']+" | 订单号：暂无 <em></em></td></tr>";	
+
 		    		h+="<tr class='Order_Details'><td colspan='3'><table class='Order_product_style'><tbody><tr><td><div class='product_name clearfix'><a href='"+baseUrl+"/goods/showGoodsDetailInfo.action?id="+goods['id']+"' class='product_img' target='_parent'><img src='http://localhost/sht/common/goods_getGoodsImg.action?size=200&imgName="+goods['mainImgPath']+"' width='80px' height='80px'></a>";	
-		    		h+="<a href=javascript:showGoodsdetail('"+id+"'); class='p_name'>"+goods['title']+"</a><p class='specification'>"+goods['description']+"</p></div></td><td style='text-decoration:line-through;'>"+goods['price']+"</td><td>"+goods['sprice']+"</td></tr></tbody></table></td>  ";	
+		    		h+="<a href=javascript:showGoodsdetail('"+id+"','"+goods['status']+"'); class='p_name'>"+goods['title']+"</a><p class='specification'>"+goods['description']+"</p></div></td><td style='text-decoration:line-through;'>"+goods['price']+"</td><td>"+goods['sprice']+"</td></tr></tbody></table></td>  ";	
+
 		    		h+="<td class='split_line'><p style='color:#F30'>"+status+"</p></td>";	
 		    		if(status=="已完成订单"){
 		    			h+="<td class='operating'><a href=>查看评价</a></td></tr></tbody></table></div>";
@@ -373,11 +406,13 @@ function searchUGoods(){
 		    		}else if(status=="待发货"){
 		    			h+="<td class='operating'><a href=javascript:updateGoodsByidAndStatus('"+id+"','2');>发货</a></td></tr></tbody></table></div>";
 		    		}else if(status=="申请退款"){
+
 		    			if(goods['refusereturnmoneybill']){
 		    			h+="<td class='operating'><a href=javascript:updateGoodsByidAndStatus('"+id+"','-9');>同意退款</a>(已上传凭证)</td></tr></tbody></table></div>";
 		    			}else{
 		    			h+="<td class='operating'><a href=javascript:updateGoodsByidAndStatus('"+id+"','-9');>同意退款</a></td></tr></tbody></table></div>";	
 		    			}
+
 		    		}else if(status=="退款成功"){
 		    			h+="<td class='operating'><a href=javascript:updateGoodsByidAndStatus('"+id+"','0');>重新上架</a></td></tr></tbody></table></div>";
 		    		}else if(status=="已发货"){

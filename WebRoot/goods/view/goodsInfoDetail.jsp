@@ -11,14 +11,14 @@
     <script type="text/javascript" src="${baseUrl}/goods/js/jquery-1.11.3.js"></script>
     <script src="${baseUrl }/goods/js/goodsInfoDetail.js"></script>
     <link href="${baseUrl }/goods/css/goodsInfoDetail.css" rel="stylesheet">
-    <link rel="stylesheet" href="${baseUrl }/goods/plugin/css/swipebox.css">
+
 </head>
 <body>
 <jsp:include page="commonTitle.jsp" flush="false" />
 <input type="hidden" value="${baseUrl}" id="baseUrl" />
 <input type="hidden" value="${sessionScope.goodsDetailInfo.id}" id="goodsId" />
 <input type="hidden" value="${sessionScope.goodsDetailInfo.msgNum}" id="msgnum" />
-
+<input type="hidden" value="${sessionScope.goodsDetailInfo.userId}" id="userid" />
 
 <article>
     <div class="head">
@@ -136,7 +136,7 @@
                 <br/>
                 <br/>
                 <br/>
-                <p>欢迎填写评价：</p><sapn class="reply"></sapn>
+                <p>欢迎填写评价：</p><!-- <sapn class="reply"></sapn> -->
                 <br/>
                 <textarea rows="3" cols="100" placeholder="请填写..." id="comment-content"></textarea>
                 <br>

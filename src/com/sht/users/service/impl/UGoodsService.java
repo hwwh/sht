@@ -11,6 +11,7 @@ import com.sht.mapper.GoodsMapper;
 import com.sht.users.mapper.UGoodsMapper;
 import com.sht.users.po.UGoods;
 import com.sht.users.service.UGoodsServiceI;
+import com.sht.util.Static.CONFIG;
 @Service
 public class UGoodsService extends UBaseService implements UGoodsServiceI {
 
@@ -135,6 +136,8 @@ public void udateBuyGoodsByidAndStatus(UGoods po) {
 	//收货时
 	if(po.getStatus()==-1){
 		
+		po.setFinishtime(new Timestamp(new Date().getTime()));
+		
 		UGoods dbGoods = UGoodsMapper.getGoodsDetailById(po.getId());
 		
 		//给卖家打款
@@ -145,8 +148,8 @@ public void udateBuyGoodsByidAndStatus(UGoods po) {
 		UGoodsMapper.buyerAddScore(dbGoods);
 		
 		
-		//申请退款   取消购买
-	}else if(po.getStatus()==-9||po.getStatus()==-3){
+		//  取消购买
+	}else if(po.getStatus()==-3){
 		
 		UGoods dbGoods = UGoodsMapper.getGoodsDetailById(po.getId());
 		
@@ -161,16 +164,13 @@ public void udateBuyGoodsByidAndStatus(UGoods po) {
 
 @Override
 public void goodsCheckImgUpload(UGoods po) {
-	
-	 String versions = getValue(CONFIG.FILED_GOODS_IMGS_SIZES).toString();
+
 	 
 	 String savePath = getValue(CONFIG.FILED_SRC_RETURN_MONEY_BILL).toString();
 	 
-//	 String fileName = po.getId()+ getFileNameExt(po.getFiile().getName());
-	
 	 String fileName = po.getId()+".jpg";
 	 
-	 writeFileWithCompress(po.getFiile(), versions, savePath, fileName);
+	 writeFileToDisk(po.getFiile(), savePath, fileName);
 	 
 	 po.setRefusereturnmoneybill(fileName);
 	 
